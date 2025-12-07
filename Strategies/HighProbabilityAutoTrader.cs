@@ -26,7 +26,8 @@ namespace NinjaTrader.NinjaScript.Strategies
 {
     /// <summary>
     /// High Probability AutoTrader - A multi-confirmation trading system
-    /// Uses trend, momentum, volatility, and volume filters for high-probability setups
+    /// Uses trend, momentum (RSI + WTMomentum), volatility, and volume filters for high-probability setups
+    /// Includes optional WTMomentum indicator for enhanced momentum confirmation
     /// </summary>
     public class HighProbabilityAutoTrader : Strategy
     {
@@ -39,6 +40,9 @@ namespace NinjaTrader.NinjaScript.Strategies
         private RSI rsi;
         private ATR atr;
         private SMA volumeSMA;
+
+        // WTMomentum indicator
+        private WTMomentum wtMomentum;
 
         // State tracking
         private int consecutiveLosses;
@@ -125,6 +129,12 @@ namespace NinjaTrader.NinjaScript.Strategies
                 EnableBreakeven = true;
                 BreakevenActivationATR = 1.0;
 
+                // Default parameters - WTMomentum
+                EnableWTMomentum = true;
+                WTSensitivity = 10;
+                WTThreshold = 53;
+                WTColorBars = true;
+
                 // Display
                 EnableAlerts = true;
                 ShowSignalsOnChart = true;
@@ -142,6 +152,28 @@ namespace NinjaTrader.NinjaScript.Strategies
                 rsi = RSI(RSIPeriod, 3);
                 atr = ATR(ATRPeriod);
                 volumeSMA = SMA(Volume, VolumeSMAPeriod);
+
+                // Initialize WTMomentum indicator
+                if (EnableWTMomentum)
+                {
+                    wtMomentum = WTMomentum(
+                        WTSensitivity,           // sensitivity
+                        WTColorBars,             // colorBars
+                        WTThreshold,             // threshold
+                        Brushes.DimGray,         // thresholdLineColor
+                        Brushes.Lime,            // upperThresholdMarkerColor
+                        Brushes.Red,             // lowerThresholdMarkerColor
+                        Brushes.Red,             // negativeBarColor
+                        Brushes.Lime,            // positiveBarColor
+                        Brushes.White,           // wickColor
+                        false,                   // verticalLines
+                        new Stroke(Brushes.Green, 1),  // verticalLineUp
+                        new Stroke(Brushes.Red, 1),    // verticalLineDown
+                        @"",                     // alertSoundToPlay
+                        false                    // alertSounds
+                    );
+                    AddChartIndicator(wtMomentum);
+                }
 
                 // Add indicators to chart
                 AddChartIndicator(fastEMA);
@@ -228,19 +260,25 @@ namespace NinjaTrader.NinjaScript.Strategies
             bool emaCrossUp = IsEMACrossUp();
             bool emaCrossDown = IsEMACrossDown();
 
-            // Long signal - ALL conditions must be true
+            // WTMomentum confirmation
+            bool wtMomentumLong = IsWTMomentumBullish();
+            bool wtMomentumShort = IsWTMomentumBearish();
+
+            // Long signal - ALL conditions must be true (including WTMomentum if enabled)
             longSignal = trendBullish &&
                         momentumLong &&
                         volatilityOK &&
                         volumeConfirmed &&
-                        emaCrossUp;
+                        emaCrossUp &&
+                        wtMomentumLong;
 
-            // Short signal - ALL conditions must be true
+            // Short signal - ALL conditions must be true (including WTMomentum if enabled)
             shortSignal = trendBearish &&
                          momentumShort &&
                          volatilityOK &&
                          volumeConfirmed &&
-                         emaCrossDown;
+                         emaCrossDown &&
+                         wtMomentumShort;
 
             // Draw signals on chart
             if (ShowSignalsOnChart)
@@ -302,6 +340,54 @@ namespace NinjaTrader.NinjaScript.Strategies
         {
             // Fast EMA crossed below slow EMA within last 3 bars
             return CrossBelow(fastEMA, slowEMA, 3);
+        }
+
+        private bool IsWTMomentumBullish()
+        {
+            // If WTMomentum is disabled, always return true (no filter)
+            if (!EnableWTMomentum || wtMomentum == null)
+                return true;
+
+            // WTMomentum bullish conditions:
+            // 1. WTMomentum value is positive (above zero line) - momentum is bullish
+            // 2. OR WTMomentum is crossing up from below threshold (reversal from oversold)
+            // 3. WTMomentum is rising (current > previous)
+
+            double wtValue = wtMomentum[0];
+            double wtValuePrev = CurrentBar > 0 ? wtMomentum[1] : wtValue;
+
+            // Bullish: WTMomentum is positive and rising, or crossing up from negative
+            bool isPositive = wtValue > 0;
+            bool isRising = wtValue > wtValuePrev;
+            bool crossingUp = wtValue > -WTThreshold && wtValuePrev <= -WTThreshold;
+
+            // For long entries: WTMomentum should be positive and rising,
+            // or recovering from oversold (below -threshold)
+            return (isPositive && isRising) || crossingUp || (wtValue > -WTThreshold && isRising);
+        }
+
+        private bool IsWTMomentumBearish()
+        {
+            // If WTMomentum is disabled, always return true (no filter)
+            if (!EnableWTMomentum || wtMomentum == null)
+                return true;
+
+            // WTMomentum bearish conditions:
+            // 1. WTMomentum value is negative (below zero line) - momentum is bearish
+            // 2. OR WTMomentum is crossing down from above threshold (reversal from overbought)
+            // 3. WTMomentum is falling (current < previous)
+
+            double wtValue = wtMomentum[0];
+            double wtValuePrev = CurrentBar > 0 ? wtMomentum[1] : wtValue;
+
+            // Bearish: WTMomentum is negative and falling, or crossing down from positive
+            bool isNegative = wtValue < 0;
+            bool isFalling = wtValue < wtValuePrev;
+            bool crossingDown = wtValue < WTThreshold && wtValuePrev >= WTThreshold;
+
+            // For short entries: WTMomentum should be negative and falling,
+            // or reversing from overbought (above +threshold)
+            return (isNegative && isFalling) || crossingDown || (wtValue < WTThreshold && isFalling);
         }
 
         private bool IsWithinTradingHours()
@@ -578,6 +664,8 @@ namespace NinjaTrader.NinjaScript.Strategies
             Print("RSI: " + rsi[0].ToString("F2"));
             Print("ATR: " + atr[0].ToString("F4"));
             Print("Volume Ratio: " + (Volume[0] / volumeSMA[0]).ToString("F2") + "x");
+            if (EnableWTMomentum && wtMomentum != null)
+                Print("WTMomentum: " + wtMomentum[0].ToString("F2"));
             Print("==================");
         }
 
@@ -728,6 +816,25 @@ namespace NinjaTrader.NinjaScript.Strategies
         [NinjaScriptProperty]
         [Display(Name = "Show Signals On Chart", Order = 2, GroupName = "9. Display")]
         public bool ShowSignalsOnChart { get; set; }
+
+        // WTMomentum Parameters
+        [NinjaScriptProperty]
+        [Display(Name = "Enable WTMomentum Filter", Description = "Use WTMomentum indicator for additional momentum confirmation", Order = 1, GroupName = "10. WTMomentum")]
+        public bool EnableWTMomentum { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 50)]
+        [Display(Name = "WT Sensitivity", Description = "WTMomentum sensitivity (lower = more sensitive)", Order = 2, GroupName = "10. WTMomentum")]
+        public int WTSensitivity { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(10, 100)]
+        [Display(Name = "WT Threshold", Description = "Overbought/Oversold threshold level", Order = 3, GroupName = "10. WTMomentum")]
+        public int WTThreshold { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "WT Color Bars", Description = "Color price bars based on WTMomentum", Order = 4, GroupName = "10. WTMomentum")]
+        public bool WTColorBars { get; set; }
 
         #endregion
     }
