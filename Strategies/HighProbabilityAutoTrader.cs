@@ -140,6 +140,10 @@ namespace NinjaTrader.NinjaScript.Strategies
 
                 // Default parameters - WTBarsV3
                 EnableWTBars = false;
+                EnableWTBarsStrategy = false;
+                WTBarsConsecutiveBarsRequired = 2;
+                WTBarsRequireMomentumBar = true;
+                WTBarsUseStackedSignals = false;
                 WTBarsPeriod = 10;
                 WTBarsVersion = 1;
                 WTBarsShadowWidth = 2;
@@ -359,21 +363,43 @@ namespace NinjaTrader.NinjaScript.Strategies
             bool wtMomentumLong = IsWTMomentumBullish();
             bool wtMomentumShort = IsWTMomentumBearish();
 
-            // Long signal - ALL conditions must be true (including WTMomentum if enabled)
-            longSignal = trendBullish &&
-                        momentumLong &&
-                        volatilityOK &&
-                        volumeConfirmed &&
-                        emaCrossUp &&
-                        wtMomentumLong;
+            // WTBars strategy signals
+            bool wtBarsLong = IsWTBarsBullish();
+            bool wtBarsShort = IsWTBarsBearish();
 
-            // Short signal - ALL conditions must be true (including WTMomentum if enabled)
-            shortSignal = trendBearish &&
-                         momentumShort &&
-                         volatilityOK &&
-                         volumeConfirmed &&
-                         emaCrossDown &&
-                         wtMomentumShort;
+            // Check if WTBars strategy mode is enabled
+            if (EnableWTBarsStrategy && EnableWTBars && wtBars != null)
+            {
+                // WTBars Strategy Mode: Use WTBars as primary signal with optional filters
+                // Long signal - WTBars bullish with optional trend/volatility filters
+                longSignal = wtBarsLong &&
+                            volatilityOK &&
+                            trendBullish;
+
+                // Short signal - WTBars bearish with optional trend/volatility filters
+                shortSignal = wtBarsShort &&
+                             volatilityOK &&
+                             trendBearish;
+            }
+            else
+            {
+                // Standard Mode: Use EMA crossover with all confirmations
+                // Long signal - ALL conditions must be true (including WTMomentum if enabled)
+                longSignal = trendBullish &&
+                            momentumLong &&
+                            volatilityOK &&
+                            volumeConfirmed &&
+                            emaCrossUp &&
+                            wtMomentumLong;
+
+                // Short signal - ALL conditions must be true (including WTMomentum if enabled)
+                shortSignal = trendBearish &&
+                             momentumShort &&
+                             volatilityOK &&
+                             volumeConfirmed &&
+                             emaCrossDown &&
+                             wtMomentumShort;
+            }
 
             // Draw signals on chart
             if (ShowSignalsOnChart)
@@ -483,6 +509,80 @@ namespace NinjaTrader.NinjaScript.Strategies
             // For short entries: WTMomentum should be negative and falling,
             // or reversing from overbought (above +threshold)
             return (isNegative && isFalling) || crossingDown || (wtValue < WTThreshold && isFalling);
+        }
+
+        private bool IsWTBarsBullish()
+        {
+            // If WTBars strategy is disabled or indicator not initialized, return true (no filter)
+            if (!EnableWTBarsStrategy || !EnableWTBars || wtBars == null)
+                return true;
+
+            // Check for consecutive bullish (up) bars
+            int consecutiveUpBars = 0;
+            bool hasMomentumBar = false;
+
+            for (int i = 0; i < WTBarsConsecutiveBarsRequired && i < CurrentBar; i++)
+            {
+                // Check if current bar is bullish based on WTBars coloring
+                // WTBars typically colors bars based on momentum - bullish when close > open and momentum positive
+                bool isBullishBar = Close[i] > Open[i];
+
+                if (isBullishBar)
+                {
+                    consecutiveUpBars++;
+                    // Check for momentum bar (strong move with good range)
+                    double barRange = High[i] - Low[i];
+                    double bodySize = Math.Abs(Close[i] - Open[i]);
+                    if (bodySize > barRange * 0.6) // Body is more than 60% of range = momentum bar
+                        hasMomentumBar = true;
+                }
+                else
+                {
+                    break; // Break on first non-bullish bar
+                }
+            }
+
+            bool hasEnoughBars = consecutiveUpBars >= WTBarsConsecutiveBarsRequired;
+            bool momentumCondition = !WTBarsRequireMomentumBar || hasMomentumBar;
+
+            return hasEnoughBars && momentumCondition;
+        }
+
+        private bool IsWTBarsBearish()
+        {
+            // If WTBars strategy is disabled or indicator not initialized, return true (no filter)
+            if (!EnableWTBarsStrategy || !EnableWTBars || wtBars == null)
+                return true;
+
+            // Check for consecutive bearish (down) bars
+            int consecutiveDownBars = 0;
+            bool hasMomentumBar = false;
+
+            for (int i = 0; i < WTBarsConsecutiveBarsRequired && i < CurrentBar; i++)
+            {
+                // Check if current bar is bearish based on WTBars coloring
+                // WTBars typically colors bars based on momentum - bearish when close < open and momentum negative
+                bool isBearishBar = Close[i] < Open[i];
+
+                if (isBearishBar)
+                {
+                    consecutiveDownBars++;
+                    // Check for momentum bar (strong move with good range)
+                    double barRange = High[i] - Low[i];
+                    double bodySize = Math.Abs(Close[i] - Open[i]);
+                    if (bodySize > barRange * 0.6) // Body is more than 60% of range = momentum bar
+                        hasMomentumBar = true;
+                }
+                else
+                {
+                    break; // Break on first non-bearish bar
+                }
+            }
+
+            bool hasEnoughBars = consecutiveDownBars >= WTBarsConsecutiveBarsRequired;
+            bool momentumCondition = !WTBarsRequireMomentumBar || hasMomentumBar;
+
+            return hasEnoughBars && momentumCondition;
         }
 
         private bool IsWithinTradingHours()
@@ -937,8 +1037,25 @@ namespace NinjaTrader.NinjaScript.Strategies
         public bool EnableWTBars { get; set; }
 
         [NinjaScriptProperty]
+        [Display(Name = "Enable WTBars Strategy", Description = "Use WTBars signals as primary trade entry strategy (replaces EMA crossover)", Order = 2, GroupName = "11. WTBarsV3")]
+        public bool EnableWTBarsStrategy { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 10)]
+        [Display(Name = "Consecutive Bars Required", Description = "Number of consecutive same-direction bars required for entry signal", Order = 3, GroupName = "11. WTBarsV3")]
+        public int WTBarsConsecutiveBarsRequired { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Require Momentum Bar", Description = "Require at least one momentum bar (strong body) in the sequence", Order = 4, GroupName = "11. WTBarsV3")]
+        public bool WTBarsRequireMomentumBar { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Use Stacked Signals", Description = "Use WTBars stacked bar signals for additional confirmation", Order = 5, GroupName = "11. WTBarsV3")]
+        public bool WTBarsUseStackedSignals { get; set; }
+
+        [NinjaScriptProperty]
         [Range(1, 50)]
-        [Display(Name = "WTBars Period", Description = "WTBarsV3 period", Order = 2, GroupName = "11. WTBarsV3")]
+        [Display(Name = "WTBars Period", Description = "WTBarsV3 period", Order = 6, GroupName = "11. WTBarsV3")]
         public int WTBarsPeriod { get; set; }
 
         [NinjaScriptProperty]
