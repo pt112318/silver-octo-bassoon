@@ -44,6 +44,9 @@ namespace NinjaTrader.NinjaScript.Strategies
         // WTMomentum indicator
         private WTMomentum wtMomentum;
 
+        // WTBarsV3 indicator
+        private WTBarsV3 wtBars;
+
         // State tracking
         private int consecutiveLosses;
         private double dailyPnL;
@@ -135,6 +138,41 @@ namespace NinjaTrader.NinjaScript.Strategies
                 WTThreshold = 53;
                 WTColorBars = true;
 
+                // Default parameters - WTBarsV3
+                EnableWTBars = false;
+                WTBarsPeriod = 10;
+                WTBarsVersion = 1;
+                WTBarsShadowWidth = 2;
+                WTBarsColorsByMomo = true;
+                WTBarsColorsByMomoSensitivity = 10;
+                WTBarsThreshold = 53;
+                WTBarsPlotTI = false;
+                WTBarsPeriod1 = 9;
+                WTBarsPeriod2 = 21;
+                WTBarsLevel1 = 60;
+                WTBarsLevel2 = 53;
+                WTBarsIntentOffsetTics = 10;
+                WTBarsTIThresholdPct = 50;
+                WTBarsRangeBracket = false;
+                WTBarsLineThickness = 2;
+                WTBarsShowExitProjection = false;
+                WTBarsStopBarCount = 3;
+                WTBarsStopBarOffsetSteps = 2;
+                WTBarsShowStackedBars = false;
+                WTBarsStackedNBars = 3;
+                WTBarsStackedTrendBars = 2;
+                WTBarsStackedResetBars = 1;
+                WTBarsStackedResetAtAWstart = true;
+                WTBarsShowPotentialSetups = false;
+                WTBarsEntryOffsetSteps = 2;
+                WTBarsInitialStopSteps = 8;
+                WTBarsFixedTargetSteps = 16;
+                WTBarsMoneyMgtPct = 50;
+                WTBarsMatchesForSetup = 3;
+                WTBarsActiveModeStartTime = 930;
+                WTBarsActiveModeMinutes = 390;
+                WTBarsTrendRiderMinutes = 60;
+
                 // Display
                 EnableAlerts = true;
                 ShowSignalsOnChart = true;
@@ -173,6 +211,63 @@ namespace NinjaTrader.NinjaScript.Strategies
                         false                    // alertSounds
                     );
                     AddChartIndicator(wtMomentum);
+                }
+
+                // Initialize WTBarsV3 indicator
+                if (EnableWTBars)
+                {
+                    wtBars = WTBarsV3(
+                        WTBarsPeriod,                    // wTPeriod
+                        WTBarsVersion,                   // wTVersion
+                        Brushes.Lime,                    // barColorUp
+                        Brushes.Red,                     // barColorDown
+                        Brushes.DimGray,                 // shadowColor
+                        Brushes.Yellow,                  // dojiColor
+                        Brushes.Gray,                    // neutralIntentColor
+                        WTBarsShadowWidth,               // shadowWidth
+                        @"",                             // sound_MomentumBar
+                        @"",                             // sound_DojiBar
+                        @"",                             // sound_PauseBar
+                        @"",                             // sound_NewSetupBar
+                        false,                           // alert_MomentumBar
+                        false,                           // alert_DojiBar
+                        false,                           // alert_PauseBar
+                        false,                           // alert_NewSetupBar
+                        WTBarsColorsByMomo,              // colorsByMomo
+                        WTBarsColorsByMomoSensitivity,   // colorsByMomo_Sensitivity
+                        WTBarsThreshold,                 // threshold
+                        WTBarsPlotTI,                    // plot_TI
+                        WTBarsPeriod1,                   // period1
+                        WTBarsPeriod2,                   // period2
+                        WTBarsLevel1,                    // level1
+                        WTBarsLevel2,                    // level2
+                        WTBarsIntentOffsetTics,          // intentOffsetTics
+                        WTBarsTIThresholdPct,            // tI_ThresholdPct
+                        WTBarsRangeBracket,              // rangeBracket
+                        WTBarsLineThickness,             // lineThickness
+                        Brushes.Lime,                    // closeUpColor
+                        Brushes.Red,                     // closeDownColor
+                        WTBarsShowExitProjection,        // showExitProjection
+                        WTBarsStopBarCount,              // stopBarCount
+                        WTBarsStopBarOffsetSteps,        // stopBarOffsetSteps
+                        WTBarsShowStackedBars,           // showStackedBars
+                        WTBarsStackedNBars,              // stackedNBars
+                        WTBarsStackedTrendBars,          // stackedTrendBars
+                        WTBarsStackedResetBars,          // stackedResetBars
+                        WTBarsStackedResetAtAWstart,     // stackedResetAtAWstart
+                        Brushes.Lime,                    // stackedColorUp
+                        Brushes.Red,                     // stackedColorDn
+                        WTBarsShowPotentialSetups,       // showPotentialSetups
+                        WTBarsEntryOffsetSteps,          // entryOffsetSteps
+                        WTBarsInitialStopSteps,          // initialStopSteps
+                        WTBarsFixedTargetSteps,          // fixedTargetSteps
+                        WTBarsMoneyMgtPct,               // moneyMgtPct
+                        WTBarsMatchesForSetup,           // matchesForSetup
+                        WTBarsActiveModeStartTime,       // activeModeStartTime
+                        WTBarsActiveModeMinutes,         // activeModeMinutes
+                        WTBarsTrendRiderMinutes          // trendRiderMinutes
+                    );
+                    AddChartIndicator(wtBars);
                 }
 
                 // Add indicators to chart
@@ -835,6 +930,164 @@ namespace NinjaTrader.NinjaScript.Strategies
         [NinjaScriptProperty]
         [Display(Name = "WT Color Bars", Description = "Color price bars based on WTMomentum", Order = 4, GroupName = "10. WTMomentum")]
         public bool WTColorBars { get; set; }
+
+        // WTBarsV3 Parameters
+        [NinjaScriptProperty]
+        [Display(Name = "Enable WTBars", Description = "Enable WTBarsV3 indicator overlay on chart", Order = 1, GroupName = "11. WTBarsV3")]
+        public bool EnableWTBars { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 50)]
+        [Display(Name = "WTBars Period", Description = "WTBarsV3 period", Order = 2, GroupName = "11. WTBarsV3")]
+        public int WTBarsPeriod { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 3)]
+        [Display(Name = "WTBars Version", Description = "WTBarsV3 calculation version", Order = 3, GroupName = "11. WTBarsV3")]
+        public int WTBarsVersion { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 10)]
+        [Display(Name = "Shadow Width", Description = "Width of bar shadows", Order = 4, GroupName = "11. WTBarsV3")]
+        public int WTBarsShadowWidth { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Colors By Momentum", Description = "Color bars based on momentum", Order = 5, GroupName = "11. WTBarsV3")]
+        public bool WTBarsColorsByMomo { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 50)]
+        [Display(Name = "Colors By Momo Sensitivity", Description = "Sensitivity for momentum coloring", Order = 6, GroupName = "11. WTBarsV3")]
+        public int WTBarsColorsByMomoSensitivity { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(10, 100)]
+        [Display(Name = "WTBars Threshold", Description = "Threshold level for WTBars", Order = 7, GroupName = "11. WTBarsV3")]
+        public int WTBarsThreshold { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Plot TI", Description = "Plot trend intent", Order = 8, GroupName = "11. WTBarsV3")]
+        public bool WTBarsPlotTI { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 50)]
+        [Display(Name = "Period 1", Description = "First period for calculations", Order = 9, GroupName = "11. WTBarsV3")]
+        public int WTBarsPeriod1 { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 100)]
+        [Display(Name = "Period 2", Description = "Second period for calculations", Order = 10, GroupName = "11. WTBarsV3")]
+        public int WTBarsPeriod2 { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(10, 100)]
+        [Display(Name = "Level 1", Description = "First threshold level", Order = 11, GroupName = "11. WTBarsV3")]
+        public int WTBarsLevel1 { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(10, 100)]
+        [Display(Name = "Level 2", Description = "Second threshold level", Order = 12, GroupName = "11. WTBarsV3")]
+        public int WTBarsLevel2 { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 50)]
+        [Display(Name = "Intent Offset Tics", Description = "Offset for intent display", Order = 13, GroupName = "11. WTBarsV3")]
+        public int WTBarsIntentOffsetTics { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 100)]
+        [Display(Name = "TI Threshold Pct", Description = "Trend intent threshold percentage", Order = 14, GroupName = "11. WTBarsV3")]
+        public int WTBarsTIThresholdPct { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Range Bracket", Description = "Enable range bracket display", Order = 15, GroupName = "11. WTBarsV3")]
+        public bool WTBarsRangeBracket { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 10)]
+        [Display(Name = "Line Thickness", Description = "Thickness of lines", Order = 16, GroupName = "11. WTBarsV3")]
+        public int WTBarsLineThickness { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Show Exit Projection", Description = "Display exit projection", Order = 17, GroupName = "11. WTBarsV3")]
+        public bool WTBarsShowExitProjection { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 20)]
+        [Display(Name = "Stop Bar Count", Description = "Number of bars for stop calculation", Order = 18, GroupName = "11. WTBarsV3")]
+        public int WTBarsStopBarCount { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 20)]
+        [Display(Name = "Stop Bar Offset Steps", Description = "Offset steps for stop", Order = 19, GroupName = "11. WTBarsV3")]
+        public int WTBarsStopBarOffsetSteps { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Show Stacked Bars", Description = "Display stacked bar indicator", Order = 20, GroupName = "11. WTBarsV3")]
+        public bool WTBarsShowStackedBars { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 10)]
+        [Display(Name = "Stacked N Bars", Description = "Number of bars for stacked calculation", Order = 21, GroupName = "11. WTBarsV3")]
+        public int WTBarsStackedNBars { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 10)]
+        [Display(Name = "Stacked Trend Bars", Description = "Trend bars for stacked calculation", Order = 22, GroupName = "11. WTBarsV3")]
+        public int WTBarsStackedTrendBars { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 10)]
+        [Display(Name = "Stacked Reset Bars", Description = "Reset bars for stacked calculation", Order = 23, GroupName = "11. WTBarsV3")]
+        public int WTBarsStackedResetBars { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Stacked Reset At AW Start", Description = "Reset stacked at active window start", Order = 24, GroupName = "11. WTBarsV3")]
+        public bool WTBarsStackedResetAtAWstart { get; set; }
+
+        [NinjaScriptProperty]
+        [Display(Name = "Show Potential Setups", Description = "Display potential trade setups", Order = 25, GroupName = "11. WTBarsV3")]
+        public bool WTBarsShowPotentialSetups { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(0, 20)]
+        [Display(Name = "Entry Offset Steps", Description = "Offset steps for entry", Order = 26, GroupName = "11. WTBarsV3")]
+        public double WTBarsEntryOffsetSteps { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 50)]
+        [Display(Name = "Initial Stop Steps", Description = "Initial stop loss in steps", Order = 27, GroupName = "11. WTBarsV3")]
+        public double WTBarsInitialStopSteps { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 100)]
+        [Display(Name = "Fixed Target Steps", Description = "Fixed profit target in steps", Order = 28, GroupName = "11. WTBarsV3")]
+        public double WTBarsFixedTargetSteps { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 100)]
+        [Display(Name = "Money Mgt Pct", Description = "Money management percentage", Order = 29, GroupName = "11. WTBarsV3")]
+        public int WTBarsMoneyMgtPct { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 10)]
+        [Display(Name = "Matches For Setup", Description = "Required matches for valid setup", Order = 30, GroupName = "11. WTBarsV3")]
+        public int WTBarsMatchesForSetup { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(0, 2359)]
+        [Display(Name = "Active Mode Start Time", Description = "Start time for active mode (HHMM)", Order = 31, GroupName = "11. WTBarsV3")]
+        public double WTBarsActiveModeStartTime { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 1440)]
+        [Display(Name = "Active Mode Minutes", Description = "Duration of active mode in minutes", Order = 32, GroupName = "11. WTBarsV3")]
+        public double WTBarsActiveModeMinutes { get; set; }
+
+        [NinjaScriptProperty]
+        [Range(1, 1440)]
+        [Display(Name = "Trend Rider Minutes", Description = "Duration of trend rider mode in minutes", Order = 33, GroupName = "11. WTBarsV3")]
+        public double WTBarsTrendRiderMinutes { get; set; }
 
         #endregion
     }
