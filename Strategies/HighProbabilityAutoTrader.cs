@@ -59,6 +59,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private bool longSignal;
         private bool shortSignal;
         private int barssinceEntry;
+        private bool lastEntryWasLong;
 
         #endregion
 
@@ -459,6 +460,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 
                 entryPrice = Close[0];
                 tradesToday++;
+                lastEntryWasLong = true;
 
                 if (EnableAlerts)
                     Alert("LongEntry", Priority.Medium, "LONG entry signal triggered",
@@ -478,6 +480,7 @@ namespace NinjaTrader.NinjaScript.Strategies
 
                 entryPrice = Close[0];
                 tradesToday++;
+                lastEntryWasLong = false;
 
                 if (EnableAlerts)
                     Alert("ShortEntry", Priority.Medium, "SHORT entry signal triggered",
@@ -612,15 +615,17 @@ namespace NinjaTrader.NinjaScript.Strategies
             // Track P&L for risk management
             if (execution.Order.OrderState == OrderState.Filled)
             {
-                if (Position.MarketPosition == MarketPosition.Flat && execution.Order.IsExitStrategy)
+                // Check if this is an exit order (not an entry order) and position is now flat
+                bool isExitOrder = execution.Order.Name != "Long Entry" && execution.Order.Name != "Short Entry";
+                if (Position.MarketPosition == MarketPosition.Flat && isExitOrder)
                 {
                     double tradePnL = 0;
 
-                    if (execution.Order.Name.Contains("Long"))
+                    if (lastEntryWasLong)
                     {
                         tradePnL = (price - entryPrice) * execution.Quantity * Instrument.MasterInstrument.PointValue;
                     }
-                    else if (execution.Order.Name.Contains("Short"))
+                    else
                     {
                         tradePnL = (entryPrice - price) * execution.Quantity * Instrument.MasterInstrument.PointValue;
                     }
