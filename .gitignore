@@ -1,0 +1,50 @@
+# NinjaTrader compiled files
+*.dll
+*.exe
+*.pdb
+*.cache
+*.suo
+*.user
+
+# Visual Studio
+.vs/
+*.vshost.*
+bin/
+obj/
+
+# NinjaTrader specific
+*.compile
+db/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*.bak
+*.backup
+
+# Personal configuration (may contain sensitive info)
+*.personal.xml
+credentials.*
+api_keys.*
+
+# Trade history and data
+TradeHistory/
+DataExport/
+*.csv
+
+# Temporary files
+tmp/
+temp/
+*.tmp

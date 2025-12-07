@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  NinjaTrader High-Probability AutoTrader Default Configuration
+
+  This file contains recommended default settings for different instruments and timeframes.
+  Copy and adjust these settings based on your risk tolerance and trading style.
+
+  IMPORTANT: Always backtest with your specific instrument before live trading!
+-->
+<AutoTraderSettings>
+
+  <!-- ============================================ -->
+  <!-- ES (E-mini S&P 500 Futures) Settings -->
+  <!-- ============================================ -->
+  <InstrumentSettings name="ES" description="E-mini S&P 500 Futures">
+    <Timeframe>5 Minutes</Timeframe>
+
+    <TrendParameters>
+      <FastEMAPeriod>8</FastEMAPeriod>
+      <SlowEMAPeriod>21</SlowEMAPeriod>
+      <TrendEMAPeriod>50</TrendEMAPeriod>
+    </TrendParameters>
+
+    <MomentumParameters>
+      <RSIPeriod>14</RSIPeriod>
+      <RSIUpperThreshold>70</RSIUpperThreshold>
+      <RSILowerThreshold>30</RSILowerThreshold>
+      <RSILongMin>40</RSILongMin>
+      <RSIShortMax>60</RSIShortMax>
+    </MomentumParameters>
+
+    <VolatilityParameters>
+      <ATRPeriod>14</ATRPeriod>
+      <ATRMultiplierStop>2.0</ATRMultiplierStop>
+      <ATRMultiplierTarget>4.0</ATRMultiplierTarget>
+      <MinATRThreshold>1.0</MinATRThreshold>
+    </VolatilityParameters>
+
+    <VolumeParameters>
+      <VolumeSMAPeriod>20</VolumeSMAPeriod>
+      <VolumeMultiplier>1.3</VolumeMultiplier>
+    </VolumeParameters>
+
+    <RiskManagement>
+      <RiskPercent>1.0</RiskPercent>
+      <MaxDailyLossPercent>3.0</MaxDailyLossPercent>
+      <MaxConsecutiveLosses>3</MaxConsecutiveLosses>
+      <MaxTradesPerDay>5</MaxTradesPerDay>
+    </RiskManagement>
+
+    <TimeFilter>
+      <EnableTimeFilter>true</EnableTimeFilter>
+      <TradingStartTime>09:30</TradingStartTime>
+      <TradingEndTime>15:30</TradingEndTime>
+    </TimeFilter>
+
+    <TrailingStop>
+      <EnableTrailingStop>true</EnableTrailingStop>
+      <TrailingStopActivationATR>1.0</TrailingStopActivationATR>
+      <TrailingStopATR>1.5</TrailingStopATR>
+    </TrailingStop>
+  </InstrumentSettings>
+
+  <!-- ============================================ -->
+  <!-- NQ (E-mini NASDAQ 100 Futures) Settings -->
+  <!-- ============================================ -->
+  <InstrumentSettings name="NQ" description="E-mini NASDAQ 100 Futures">
+    <Timeframe>5 Minutes</Timeframe>
+
+    <TrendParameters>
+      <FastEMAPeriod>8</FastEMAPeriod>
+      <SlowEMAPeriod>21</SlowEMAPeriod>
+      <TrendEMAPeriod>50</TrendEMAPeriod>
+    </TrendParameters>
+
+    <MomentumParameters>
+      <RSIPeriod>14</RSIPeriod>
+      <RSIUpperThreshold>75</RSIUpperThreshold>
+      <RSILowerThreshold>25</RSILowerThreshold>
+      <RSILongMin>35</RSILongMin>
+      <RSIShortMax>65</RSIShortMax>
+    </MomentumParameters>
+
+    <VolatilityParameters>
+      <ATRPeriod>14</ATRPeriod>
+      <ATRMultiplierStop>2.5</ATRMultiplierStop>
+      <ATRMultiplierTarget>5.0</ATRMultiplierTarget>
+      <MinATRThreshold>5.0</MinATRThreshold>
+    </VolatilityParameters>
+
+    <VolumeParameters>
+      <VolumeSMAPeriod>20</VolumeSMAPeriod>
+      <VolumeMultiplier>1.5</VolumeMultiplier>
+    </VolumeParameters>
+
+    <RiskManagement>
+      <RiskPercent>0.75</RiskPercent>
+      <MaxDailyLossPercent>2.5</MaxDailyLossPercent>
+      <MaxConsecutiveLosses>3</MaxConsecutiveLosses>
+      <MaxTradesPerDay>4</MaxTradesPerDay>
+    </RiskManagement>
+
+    <TimeFilter>
+      <EnableTimeFilter>true</EnableTimeFilter>
+      <TradingStartTime>09:30</TradingStartTime>
+      <TradingEndTime>15:30</TradingEndTime>
+    </TimeFilter>
+  </InstrumentSettings>
+
+  <!-- ============================================ -->
+  <!-- CL (Crude Oil Futures) Settings -->
+  <!-- ============================================ -->
+  <InstrumentSettings name="CL" description="Crude Oil Futures">
+    <Timeframe>5 Minutes</Timeframe>
+
+    <TrendParameters>
+      <FastEMAPeriod>9</FastEMAPeriod>
+      <SlowEMAPeriod>21</SlowEMAPeriod>
+      <TrendEMAPeriod>50</TrendEMAPeriod>
+    </TrendParameters>
+
+    <MomentumParameters>
+      <RSIPeriod>14</RSIPeriod>
+      <RSIUpperThreshold>70</RSIUpperThreshold>
+      <RSILowerThreshold>30</RSILowerThreshold>
+      <RSILongMin>40</RSILongMin>
+      <RSIShortMax>60</RSIShortMax>
+    </MomentumParameters>
+
+    <VolatilityParameters>
+      <ATRPeriod>14</ATRPeriod>
+      <ATRMultiplierStop>2.0</ATRMultiplierStop>
+      <ATRMultiplierTarget>3.5</ATRMultiplierTarget>
+      <MinATRThreshold>0.10</MinATRThreshold>
+    </VolatilityParameters>
+
+    <VolumeParameters>
+      <VolumeSMAPeriod>20</VolumeSMAPeriod>
+      <VolumeMultiplier>1.4</VolumeMultiplier>
+    </VolumeParameters>
+
+    <RiskManagement>
+      <RiskPercent>0.5</RiskPercent>
+      <MaxDailyLossPercent>2.0</MaxDailyLossPercent>
+      <MaxConsecutiveLosses>3</MaxConsecutiveLosses>
+      <MaxTradesPerDay>4</MaxTradesPerDay>
+    </RiskManagement>
+
+    <TimeFilter>
+      <EnableTimeFilter>true</EnableTimeFilter>
+      <TradingStartTime>09:00</TradingStartTime>
+      <TradingEndTime>14:30</TradingEndTime>
+    </TimeFilter>
+  </InstrumentSettings>
+
+  <!-- ============================================ -->
+  <!-- GC (Gold Futures) Settings -->
+  <!-- ============================================ -->
+  <InstrumentSettings name="GC" description="Gold Futures">
+    <Timeframe>15 Minutes</Timeframe>
+
+    <TrendParameters>
+      <FastEMAPeriod>8</FastEMAPeriod>
+      <SlowEMAPeriod>21</SlowEMAPeriod>
+      <TrendEMAPeriod>50</TrendEMAPeriod>
+    </TrendParameters>
+
+    <MomentumParameters>
+      <RSIPeriod>14</RSIPeriod>
+      <RSIUpperThreshold>70</RSIUpperThreshold>
+      <RSILowerThreshold>30</RSILowerThreshold>
+      <RSILongMin>45</RSILongMin>
+      <RSIShortMax>55</RSIShortMax>
+    </MomentumParameters>
+
+    <VolatilityParameters>
+      <ATRPeriod>14</ATRPeriod>
+      <ATRMultiplierStop>2.0</ATRMultiplierStop>
+      <ATRMultiplierTarget>4.0</ATRMultiplierTarget>
+      <MinATRThreshold>2.0</MinATRThreshold>
+    </VolatilityParameters>
+
+    <RiskManagement>
+      <RiskPercent>0.75</RiskPercent>
+      <MaxDailyLossPercent>2.0</MaxDailyLossPercent>
+      <MaxConsecutiveLosses>3</MaxConsecutiveLosses>
+      <MaxTradesPerDay>3</MaxTradesPerDay>
+    </RiskManagement>
+  </InstrumentSettings>
+
+  <!-- ============================================ -->
+  <!-- Scalping Configuration (Any Instrument) -->
+  <!-- ============================================ -->
+  <InstrumentSettings name="Scalping" description="Aggressive scalping settings for liquid instruments">
+    <Timeframe>1 Minute</Timeframe>
+
+    <TrendParameters>
+      <FastEMAPeriod>5</FastEMAPeriod>
+      <SlowEMAPeriod>13</SlowEMAPeriod>
+      <TrendEMAPeriod>34</TrendEMAPeriod>
+    </TrendParameters>
+
+    <MomentumParameters>
+      <RSIPeriod>9</RSIPeriod>
+      <RSIUpperThreshold>75</RSIUpperThreshold>
+      <RSILowerThreshold>25</RSILowerThreshold>
+      <RSILongMin>45</RSILongMin>
+      <RSIShortMax>55</RSIShortMax>
+    </MomentumParameters>
+
+    <VolatilityParameters>
+      <ATRPeriod>10</ATRPeriod>
+      <ATRMultiplierStop>1.5</ATRMultiplierStop>
+      <ATRMultiplierTarget>2.0</ATRMultiplierTarget>
+    </VolatilityParameters>
+
+    <VolumeParameters>
+      <VolumeSMAPeriod>10</VolumeSMAPeriod>
+      <VolumeMultiplier>1.2</VolumeMultiplier>
+    </VolumeParameters>
+
+    <RiskManagement>
+      <RiskPercent>0.25</RiskPercent>
+      <MaxDailyLossPercent>1.5</MaxDailyLossPercent>
+      <MaxConsecutiveLosses>4</MaxConsecutiveLosses>
+      <MaxTradesPerDay>15</MaxTradesPerDay>
+    </RiskManagement>
+  </InstrumentSettings>
+
+  <!-- ============================================ -->
+  <!-- Swing Trading Configuration -->
+  <!-- ============================================ -->
+  <InstrumentSettings name="SwingTrading" description="Swing trading settings for position trades">
+    <Timeframe>60 Minutes</Timeframe>
+
+    <TrendParameters>
+      <FastEMAPeriod>12</FastEMAPeriod>
+      <SlowEMAPeriod>26</SlowEMAPeriod>
+      <TrendEMAPeriod>100</TrendEMAPeriod>
+    </TrendParameters>
+
+    <MomentumParameters>
+      <RSIPeriod>14</RSIPeriod>
+      <RSIUpperThreshold>65</RSIUpperThreshold>
+      <RSILowerThreshold>35</RSILowerThreshold>
+      <RSILongMin>45</RSILongMin>
+      <RSIShortMax>55</RSIShortMax>
+    </MomentumParameters>
+
+    <VolatilityParameters>
+      <ATRPeriod>14</ATRPeriod>
+      <ATRMultiplierStop>3.0</ATRMultiplierStop>
+      <ATRMultiplierTarget>6.0</ATRMultiplierTarget>
+    </VolatilityParameters>
+
+    <RiskManagement>
+      <RiskPercent>2.0</RiskPercent>
+      <MaxDailyLossPercent>5.0</MaxDailyLossPercent>
+      <MaxConsecutiveLosses>2</MaxConsecutiveLosses>
+      <MaxTradesPerDay>2</MaxTradesPerDay>
+    </RiskManagement>
+
+    <TimeFilter>
+      <EnableTimeFilter>false</EnableTimeFilter>
+    </TimeFilter>
+
+    <TrailingStop>
+      <EnableTrailingStop>true</EnableTrailingStop>
+      <TrailingStopActivationATR>2.0</TrailingStopActivationATR>
+      <TrailingStopATR>2.5</TrailingStopATR>
+    </TrailingStop>
+  </InstrumentSettings>
+
+</AutoTraderSettings>
